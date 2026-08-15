@@ -241,6 +241,9 @@ func Localize(cfg config.Config, ix *model.SystemIndex, records []model.Evidence
 	}
 
 	halfWidth := loc.CoverageFactor * sigma
+	if maxDeviation > halfWidth {
+		halfWidth = maxDeviation
+	}
 	width := 2 * halfWidth
 	if width < loc.MinWindowKm {
 		width = loc.MinWindowKm
