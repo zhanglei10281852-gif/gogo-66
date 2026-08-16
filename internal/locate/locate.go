@@ -240,7 +240,17 @@ func Localize(cfg config.Config, ix *model.SystemIndex, records []model.Evidence
 		sort.Strings(res.Estimates[i].Flags)
 	}
 
+	// The window must cover the worst single measurement deviation, not just
+	// the inverse-variance combined sigma: when the ends disagree the
+	// combined sigma stays small (it tracks precision, not bias), so a purely
+	// statistical half-width can exclude the very estimates it is derived from.
+	// Floor the half-width at maxDeviation so the window always brackets every
+	// per-record route estimate and both per-end estimates, while agreeing
+	// evidence (maxDeviation ~ 0) keeps the window at the statistical width.
 	halfWidth := loc.CoverageFactor * sigma
+	if maxDeviation > halfWidth {
+		halfWidth = maxDeviation
+	}
 	width := 2 * halfWidth
 	if width < loc.MinWindowKm {
 		width = loc.MinWindowKm
